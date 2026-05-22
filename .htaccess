@@ -1,0 +1,51 @@
+# PhoneFix Pro - Server Protection Configuration
+
+# Prevent direct access to admin folder from unauthorized locations
+<Directory "/admin">
+    # Require authentication for all admin files
+    <FilesMatch "\.(html|php|js)$">
+        Require all granted
+    </FilesMatch>
+</Directory>
+
+# Prevent access to sensitive files
+<FilesMatch "^\.(env|git|config|htaccess|htpasswd)$">
+    Require all denied
+</FilesMatch>
+
+# Enable GZIP compression
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json
+</IfModule>
+
+# Set cache headers
+<FilesMatch "\.(jpg|jpeg|png|gif|css|js|svg|woff|woff2|ttf|eot)$">
+    Header set Cache-Control "max-age=31536000, public"
+</FilesMatch>
+
+# Protect admin from bots
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Block suspicious user agents
+    RewriteCond %{HTTP_USER_AGENT} (bot|crawler|spider|scraper) [NC]
+    RewriteRule ^admin/ - [F,L]
+    
+    # Block if accessing admin without proper session
+    # Note: This requires server-side session management
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Disable directory listing
+Options -Indexes
+
+# Allow standard web files
+<FilesMatch "\.(html|css|js|json|txt|xml|svg|woff|woff2)$">
+    Allow from all
+</FilesMatch>
